@@ -1,68 +1,27 @@
-import { gql } from "apollo-server";
-import { ApolloServer } from "apollo-server";
+import { ApolloServer } from "apollo-server-express";
 import "./db.js";
-import Product from "./models/Product.js";
+import typeDefs from "./typeDefs.js";
+import resolvers from "./resolvers.js";
+import express, { json, urlencoded } from "express";
+import cors from "cors";
 
-const typeDefs = gql`
-  type Product {
-    _id: ID!
-    name: String!
-    price: Float!
-    description: String!
-    image_url: String!
-  }
+const app = express();
+app.use(cors());
+app.use(json());
+app.use(urlencoded({ extended: false }));
 
-  type Query {
-    allProducts: [Product]!
-  }
+app.get("/",(req,res)=>res.send("SBS Challenge API"))
 
-  type Mutation {
-    EditProduct(
-      _id: ID!
-      name: String
-      price: Float
-      description: String
-      image_url: String
-    ): Product!
+async function start() {
+  const server = new ApolloServer({ typeDefs, resolvers });
+  await server.start();
 
-    CreateProduct(
-      name: String!
-      price: Float!
-      description: String!
-      image_url: String!
-    ): Product!
+  server.applyMiddleware({ app });
 
-    DeleteProduct(_id: ID!): String!
-  }
-`;
+  app.listen(3000, () => {
+    console.log(`Server ready`, 3000);
+  });
+}
+start();
 
-const resolvers = {
-  Query: {
-    allProducts: async () => {
-      return await Product.find({});
-    },
-  },
-  Mutation: {
-    EditProduct: async (root, args) => {
-      await Product.findByIdAndUpdate(args._id,args);
-      const modifiedProduct = await Product.findById(args._id);
-      return modifiedProduct;
-    },
-    CreateProduct: async (root, args) => {
-      const newProduct = new Product(args);
-      await newProduct.save();
-      return newProduct;
-    },
-    DeleteProduct: async (root, args) => {
-      const { _id } = args;
-      await Product.findByIdAndDelete(_id);
-      return "Producto eliminado";
-    },
-  },
-};
-
-const server = new ApolloServer({ typeDefs, resolvers });
-
-server.listen().then(({ url }) => {
-  console.log(`Server ready at ${url}`);
-});
+export default app;
