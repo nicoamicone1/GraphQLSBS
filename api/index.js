@@ -4,6 +4,9 @@ import typeDefs from "./typeDefs.js";
 import resolvers from "./resolvers.js";
 import express, { json, urlencoded } from "express";
 import cors from "cors";
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const app = express();
 app.use(cors());
@@ -18,8 +21,8 @@ async function start() {
 
   server.applyMiddleware({ app });
 
-  app.listen(3000, () => {
-    console.log(`Server ready`, 3000);
+  app.listen(process.env.PORT, () => {
+    console.log(`Server ready`, process.env.PORT);
   });
 }
 start();
