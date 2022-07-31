@@ -13,7 +13,8 @@ const resolvers = {
       return modifiedProduct;
     },
     CreateProduct: async (root, args) => {
-      const newProduct = new Product(args);
+      const {name,price,description,image_url}=args
+      const newProduct = new Product({name,price,description,image_url});
       await newProduct.save();
       return newProduct;
     },
